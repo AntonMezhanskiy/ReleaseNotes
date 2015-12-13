@@ -1,0 +1,22 @@
+html {
+	overflow-y:scroll;
+}
+
+.container {
+	max-width: 880px;
+}
+
+footer {
+	padding-top: 40px;
+	padding-bottom: 40px;
+	margin-top: 40px;
+	color: #767676;
+	text-align: center;
+	border-top: 1px solid #e5e5e5;
+}
+
+.header {
+	padding-top: 20px;
+    margin-bottom: 40px;
+	border-bottom: 1px solid #e5e5e5;
+}

@@ -1,0 +1,14 @@
+{{ define "index" }}
+{{ template "header" . }}
+<div class="row">
+    {{ range $value := .Posts }}
+    <div class="col-xs-8 col-md-9">
+        <h4><a href="/entry/{{$value.ViewId}}/">{{ $value.Title }}</a></h4>
+    </div>
+    <div class="col-xs-4 col-md-3 text-right">
+        <h4><small class="text-muted"><em>{{$value.PublicDate}}</em></small></h4>
+    </div>
+    {{ end }}
+</div>
+{{ template "footer" }}
+{{ end }}
