@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 
@@ -23,21 +22,11 @@ func SignIn(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func SignInPost(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	pass := r.FormValue("pass")
-	email := r.FormValue("email")
-	chechMe := r.FormValue("CheckMe")
-	fmt.Println(pass, email, chechMe)
-	t, err := template.ParseFiles("templates/index.html", "templates/header.html", "templates/footer.html")
-	checkErr(err)
-
-	data := struct {
-		Title string
-	}{
-		Title: "Title",
-	}
+	// pass := r.FormValue("pass")
+	// email := r.FormValue("email")
 
 	cookie := http.Cookie{Name: "user_session", Value: "test", Path: "/", HttpOnly: true}
 	http.SetCookie(w, &cookie)
 
-	t.ExecuteTemplate(w, "index", data)
+	http.Redirect(w, r, "/", 301)
 }
