@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/AntonMezhanskiy/changelog/models"
+	"github.com/AntonMezhanskiy/changelog/routes"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -13,11 +13,11 @@ func main() {
 
 	router.ServeFiles("/static/*filepath", http.Dir("static/"))
 
-	router.GET("/", models.Index)
-	router.GET("/signin/", models.SignIn)
-	router.GET("/entry/:entry/", models.Entry)
+	router.GET("/", routes.Index)
+	router.GET("/signin/", routes.SignIn)
+	router.GET("/entry/:entry/", routes.Entry)
 
-	router.POST("/signin/", models.SignInPost)
+	router.POST("/signin/", routes.SignInPost)
 
 	log.Fatal(http.ListenAndServe(":8888", router))
 }
