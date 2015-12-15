@@ -2,7 +2,6 @@ package routes
 
 import (
 	"database/sql"
-	"fmt"
 	"html/template"
 	"net/http"
 	"strings"
@@ -62,9 +61,6 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 	rows.Close()
 	db.Close()
-
-	cookie := MySession(r)
-	fmt.Println(cookie)
 
 	data := struct {
 		Title string
