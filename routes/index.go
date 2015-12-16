@@ -1,29 +1,21 @@
 package routes
 
 import (
-	"database/sql"
+	"bytes"
+	"encoding/gob"
+	// "fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/boltdb/bolt"
 	"github.com/julienschmidt/httprouter"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	t, err := template.ParseFiles("templates/index.html", "templates/header.html", "templates/footer.html")
-	checkErr(err)
-
-	db, err := sql.Open("sqlite3", "db/main.db")
-	checkErr(err)
-
-	// query
-	rows, err := db.Query(`SELECT
-		title,
-		publicDate,
-		viewid
-		FROM posts WHERE visibility = '1' ORDER BY id DESC;`)
 	checkErr(err)
 
 	// Create replacer with pairs as arguments.
@@ -43,24 +35,38 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	posts := []Post{}
 
-	for rows.Next() {
-		post := Post{}
-		err := rows.Scan(
-			&post.Title,
-			&post.PublicDate,
-			&post.ViewId)
-		checkErr(err)
+	db, err := bolt.Open("my.db", 0600, nil)
+	checkErr(err)
+	defer db.Close()
 
-		parsed_time, _ := time.Parse(time_layout, post.PublicDate)
-		post.PublicDate = parsed_time.Format(time_format)
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("posts"))
+		c := b.Cursor()
 
-		// Replace all pairs.
-		post.PublicDate = replacer.Replace(post.PublicDate)
+		for k, v := c.First(); k != nil; k, v = c.Next() {
 
-		posts = append(posts, post)
-	}
-	rows.Close()
-	db.Close()
+			buf := bytes.NewBuffer(v)
+			dec := gob.NewDecoder(buf)
+
+			var q Post
+			err = dec.Decode(&q)
+			if err != nil {
+				log.Fatal("decode error 1:", err)
+			}
+
+			// fmt.Println(new(big.Int).SetBytes(k), q.Title, q.Content, q.Created)
+			post := Post{q.Title, q.PublicDate, q.ViewId, q.Body}
+			parsed_time, _ := time.Parse(time_layout, post.PublicDate)
+			post.PublicDate = parsed_time.Format(time_format)
+
+			// Replace all pairs.
+			post.PublicDate = replacer.Replace(post.PublicDate)
+
+			posts = append(posts, post)
+		}
+
+		return nil
+	})
 
 	data := struct {
 		Title string

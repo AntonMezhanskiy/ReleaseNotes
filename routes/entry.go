@@ -1,14 +1,17 @@
 package routes
 
 import (
-	"database/sql"
+	"bytes"
+	"encoding/gob"
+	// "fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/boltdb/bolt"
 	"github.com/julienschmidt/httprouter"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/russross/blackfriday"
 )
 
@@ -18,16 +21,6 @@ func Entry(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	htmlFuncMap := make(template.FuncMap)
 	htmlFuncMap["markDown"] = MarkDown
 	t, err := template.New("").Funcs(htmlFuncMap).ParseFiles("templates/entry.html", "templates/header.html", "templates/footer.html")
-	checkErr(err)
-
-	db, err := sql.Open("sqlite3", "db/main.db")
-	checkErr(err)
-
-	rows, err := db.Query(`SELECT
-		title, 
-		publicDate,
-		description
-		FROM posts WHERE viewid=?;`, entry)
 	checkErr(err)
 
 	// Create replacer with pairs as arguments.
@@ -47,24 +40,40 @@ func Entry(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	var Title, PublicDate, Body string
 
-	for rows.Next() {
-		err := rows.Scan(
-			&Title,
-			&PublicDate,
-			&Body)
-		checkErr(err)
+	db, err := bolt.Open("my.db", 0600, nil)
+	checkErr(err)
+	defer db.Close()
 
-		parsed_time, _ := time.Parse(time_layout, PublicDate)
-		PublicDate = parsed_time.Format(time_format)
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("posts"))
+		c := b.Cursor()
+		min := []byte(entry)
 
-		// Replace all pairs.
-		PublicDate = replacer.Replace(PublicDate)
+		for k, v := c.Seek(min); k != nil && bytes.Compare(k, min) <= 0; k, v = c.Next() {
+			buf := bytes.NewBuffer(v)
+			dec := gob.NewDecoder(buf)
 
-		Body = string(blackfriday.MarkdownBasic([]byte(Body)))
-	}
+			var q Post
+			err = dec.Decode(&q)
+			if err != nil {
+				log.Fatal("decode error 1:", err)
+			}
+			Title = q.Title
+			PublicDate = q.PublicDate
+			Body = q.Body
 
-	rows.Close()
-	db.Close()
+			parsed_time, _ := time.Parse(time_layout, PublicDate)
+			PublicDate = parsed_time.Format(time_format)
+
+			// Replace all pairs.
+			PublicDate = replacer.Replace(PublicDate)
+
+			Body = string(blackfriday.MarkdownBasic([]byte(Body)))
+			// fmt.Printf("%s: %s\n", new(big.Int).SetBytes(k), q.Title)
+		}
+
+		return nil
+	})
 
 	if Title == "" {
 		http.Redirect(w, r, "/", 301)
