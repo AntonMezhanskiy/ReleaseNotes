@@ -2,22 +2,48 @@ html {
 	overflow-y:scroll;
 }
 
+body {
+	background-color: #F5F5F5;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
 footer {
+	width: 100%;
+	overflow-x: hidden;
+	max-width: 100%;
 	padding-top: 40px;
 	padding-bottom: 40px;
 	margin-top: 40px;
-	color: #767676;
+	color: #F5F5F5;
 	text-align: center;
 	border-top: 1px solid #e5e5e5;
+	background-color: #101E1F;
+	min-height: 20%;
+	margin-right: 0px;
+	padding-left: 0px;
 }
 
 .header {
 	padding-top: 20px;
     margin-bottom: 40px;
 	border-bottom: 1px solid #e5e5e5;
+	background-color: #A01E20;
 }
 
-.container {
+.header a {
+	color: #F5F5F5;
+}
+
+.box {
+	min-height: 80%;
+}
+
+.container {	
 	max-width: 880px;
 }
 
