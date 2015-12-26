@@ -1,14 +1,8 @@
 {{ define "index" }}
 {{ template "header" . }}
+<a class="btn btn-default" href="/edit/" role="button">Edit</a>
 <div class="row">
-    {{ range $value := .Posts }}
-    <div class="col-xs-8 col-md-9">
-        <h4><a href="/entry/{{ $value.ViewId }}/">{{ $value.Title }}</a></h4>
-    </div>
-    <div class="col-xs-4 col-md-3 text-right">
-        <h4><small class="text-muted"><em>{{ $value.PublicDate }}</em></small></h4>
-    </div>
-    {{ end }}
+	<div id="description" class="col-md-12">{{ markDown .Body }}</div>
 </div>
 {{ template "footer" }}
 {{ end }}

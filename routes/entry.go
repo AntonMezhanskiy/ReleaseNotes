@@ -3,11 +3,9 @@ package routes
 import (
 	"bytes"
 	"encoding/gob"
-	// "fmt"
 	"html/template"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -23,29 +21,14 @@ func Entry(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	t, err := template.New("").Funcs(htmlFuncMap).ParseFiles("templates/entry.html", "templates/header.html", "templates/footer.html")
 	checkErr(err)
 
-	// Create replacer with pairs as arguments.
-	replacer := strings.NewReplacer(
-		"January", "Январь",
-		"February", "Февраль",
-		"March", "Март",
-		"April", "Апрель",
-		"May", "Май",
-		"June", "Июнь",
-		"July", "Июль",
-		"August", "Август",
-		"September", "Сентябрь",
-		"October", "Октябрь",
-		"November", "Ноябрь",
-		"December", "Декабрь")
-
-	var Title, PublicDate, Body string
+	var Title, PublicDate, Body, ReleaseNumber string
 
 	db, err := bolt.Open("my.db", 0600, nil)
 	checkErr(err)
 	defer db.Close()
 
 	db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("posts"))
+		b := tx.Bucket([]byte("notes"))
 		c := b.Cursor()
 		min := []byte(entry)
 
@@ -53,7 +36,7 @@ func Entry(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			buf := bytes.NewBuffer(v)
 			dec := gob.NewDecoder(buf)
 
-			var q Post
+			var q Note
 			err = dec.Decode(&q)
 			if err != nil {
 				log.Fatal("decode error 1:", err)
@@ -61,15 +44,12 @@ func Entry(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			Title = q.Title
 			PublicDate = q.PublicDate
 			Body = q.Body
+			ReleaseNumber = q.ReleaseNumber
 
 			parsed_time, _ := time.Parse(time_layout, PublicDate)
 			PublicDate = parsed_time.Format(time_format)
 
-			// Replace all pairs.
-			PublicDate = replacer.Replace(PublicDate)
-
 			Body = string(blackfriday.MarkdownBasic([]byte(Body)))
-			// fmt.Printf("%s: %s\n", new(big.Int).SetBytes(k), q.Title)
 		}
 
 		return nil
@@ -80,11 +60,12 @@ func Entry(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	data := struct {
-		Title, PublicDate, Body string
+		Title, PublicDate, Body, ReleaseNumber string
 	}{
-		Title:      Title,
-		PublicDate: PublicDate,
-		Body:       Body,
+		Title:         Title,
+		PublicDate:    PublicDate,
+		Body:          Body,
+		ReleaseNumber: ReleaseNumber,
 	}
 
 	t.ExecuteTemplate(w, "entry", data)

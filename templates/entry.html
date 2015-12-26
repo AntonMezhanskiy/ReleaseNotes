@@ -1,7 +1,7 @@
 {{ define "entry" }}
 {{ template "header" . }}
-<h1>{{ .Title }}</h1>
-<h5 id="publicDate" class='text-muted'>опубликовано {{ .PublicDate }}</h5>
+<h1>{{ .Title }}<small class="text-muted"><em> {{ .ReleaseNumber }}</em></small></h1>
+<h5 id="publicDate" class='text-muted'>published {{ .PublicDate }}</h5>
 <div class="row">
 <div id="description" class="col-md-12">{{ markDown .Body }}</div>
 </div>
