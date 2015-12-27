@@ -13,7 +13,6 @@ body {
 }
 
 footer {
-	width: 100%;
 	overflow-x: hidden;
 	max-width: 100%;
 	padding-top: 40px;
@@ -23,16 +22,12 @@ footer {
 	text-align: center;
 	border-top: 1px solid #e5e5e5;
 	background-color: #101E1F;
-	min-height: 20%;
-	margin-right: 0px;
-	padding-left: 0px;
 }
 
 .header {
-	padding-top: 20px;
     margin-bottom: 40px;
 	border-bottom: 1px solid #e5e5e5;
-	background-color: #A01E20;
+	background-color: #DE5833;
 }
 
 .header a {
@@ -40,7 +35,7 @@ footer {
 }
 
 .box {
-	min-height: 80%;
+	min-height: 100%;
 }
 
 .container {	
