@@ -22,6 +22,7 @@ footer {
 	text-align: center;
 	border-top: 1px solid #e5e5e5;
 	background-color: #101E1F;
+	min-height: 10%;
 }
 
 .header {
@@ -35,10 +36,10 @@ footer {
 }
 
 .box {
-	min-height: 100%;
+	min-height: 84%;
 }
 
-.container {	
+.container {
 	max-width: 880px;
 }
 
